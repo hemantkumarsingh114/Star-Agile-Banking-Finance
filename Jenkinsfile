@@ -14,7 +14,7 @@ pipeline {
                 }
             }
         }
-          stage('Docker login') {
+        stage('Docker login') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-pwd', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
                     sh "echo $PASS | docker login -u $USER --password-stdin"
@@ -22,6 +22,8 @@ pipeline {
                 }
             }
         }
-        
+        stage('Configure Ansible and Deploy to the Test Server'){
+            ansiblePlaybook become: true, credentialsId: 'ansible-key', disableHostKeyChecking: true, installation: 'ansible', inventory: '/etc/ansible/hosts', playbook: 'ansible-playbook.yml'
+        }
     }
 }
