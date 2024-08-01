@@ -1,42 +1,28 @@
-pipeline{
+pipeline {
     agent any
     stages{
-        stage('1. Checkout the Code from GITHUB'){
+        stage('Build Maven'){
             steps{
-                 git url: 'https://github.com/hemantkumarsingh114/Star-Agile-Banking-Finance/'
-                 echo 'github url checkout'
+                git url:'https://github.com/hemantkumarsingh114/Star-Agile-Banking-Finance.git', branch: "master"
+               sh 'mvn clean install'
             }
         }
-        stage('2. Code Compile with Hemant'){
+        stage('Build docker image'){
             steps{
-                echo 'starting compiling'
-                sh 'mvn compile'
+                script{
+                    sh 'docker build -t hemantkumarsingh114/capstoneproject:1.0 .'
+                }
             }
         }
-        stage('3. Code Testing with Hemant'){
-            steps{
-                sh 'mvn test'
+          stage('Docker login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-pwd', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                    sh "echo $PASS | docker login -u $USER --password-stdin"
+                    sh 'docker push hemantkumarsingh114/capstoneproject:1.0'
+                }
             }
         }
-        stage('4. QA with Hemant'){
-            steps{
-                sh 'mvn checkstyle:checkstyle'
-            }
+        
         }
-        stage('5. Package with Hemant'){
-            steps{
-                sh 'mvn package'
-            }
-        }
-        stage('6. Run Dockerfile'){
-          steps{
-               sh 'docker build -t myimg .'
-           }
-         }
-        stage('7. Port Expose'){
-            steps{
-                sh 'docker run -dt -p 8081:8081 --name C01 myimg'
-            }
-        }   
     }
 }
