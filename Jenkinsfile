@@ -37,7 +37,7 @@ pipeline {
             steps {
                 ansiblePlaybook(
                     become: true,
-                    credentialsId: 'ansible-key',
+                    credentialsId: 'ansible-key1',
                     disableHostKeyChecking: true,
                     installation: 'ansible',
                     inventory: '/etc/ansible/hosts',
