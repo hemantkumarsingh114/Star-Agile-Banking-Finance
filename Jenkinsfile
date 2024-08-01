@@ -1,29 +1,49 @@
 pipeline {
     agent any
-    stages{
-        stage('Build Maven'){
-            steps{
-                git url:'https://github.com/hemantkumarsingh114/Star-Agile-Banking-Finance.git', branch: "master"
-               sh 'mvn clean install'
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                // Checkout code from the Git repository
+                git url: 'https://github.com/hemantkumarsingh114/Star-Agile-Banking-Finance.git', branch: 'master'
             }
         }
-        stage('Build docker image'){
-            steps{
-                script{
+        stage('Build Maven') {
+            steps {
+                // Run Maven build
+                sh 'mvn clean install'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build Docker image
                     sh 'docker build -t hemantkumarsingh114/capstoneproject:1.0 .'
                 }
             }
         }
-        stage('Docker login') {
+        stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-pwd', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                    sh "echo $PASS | docker login -u $USER --password-stdin"
-                    sh 'docker push hemantkumarsingh114/capstoneproject:1.0'
+                    script {
+                        // Log in to Docker Hub and push the image
+                        sh "echo $PASS | docker login -u $USER --password-stdin"
+                        sh 'docker push hemantkumarsingh114/capstoneproject:1.0'
+                    }
                 }
             }
         }
-        stage('Configure Ansible and Deploy to the Test Server'){
-            ansiblePlaybook become: true, credentialsId: 'ansible-key', disableHostKeyChecking: true, installation: 'ansible', inventory: '/etc/ansible/hosts', playbook: 'ansible-playbook.yml'
+        stage('Configure Ansible and Deploy to the Test Server') {
+            steps {
+                ansiblePlaybook(
+                    become: true,
+                    credentialsId: 'ansible-key',
+                    disableHostKeyChecking: true,
+                    installation: 'ansible',
+                    inventory: '/etc/ansible/hosts',
+                    playbook: 'ansible-playbook.yml'
+                )
+            }
         }
     }
 }
