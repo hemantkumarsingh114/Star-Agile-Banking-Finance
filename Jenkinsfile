@@ -35,7 +35,12 @@ pipeline {
         }
         stage('Configure Ansible and Deploy to the Test Server') {
             steps {
-                ansiblePlaybook credentialsId: 'ansible-key1', disableHostKeyChecking: true, installation: 'ansible', inventory: 'hosts', playbook: 'ansible-playbook.yml', vaultTmpPath: ''
+                ansiblePlaybook credentialsId: 'ansible-key1',
+                disableHostKeyChecking: true,
+                installation: 'ansible',
+                inventory: 'hosts',
+                playbook: 'ansible-playbook.yml',
+                vaultTmpPath: ''
             }
         }
     }
